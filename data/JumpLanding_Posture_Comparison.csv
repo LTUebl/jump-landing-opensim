@@ -1,0 +1,3 @@
+Trial,Posture,Absorption Duration (s),Peak Knee Flexion (deg),Trunk/Lumbar at KM (deg),Peak Total vGRF (N),Peak Total vGRF (BW),Vertical Impulse (N*s),Vertical Impulse (BW*s),Loading Rate (BW/s),vaslat_r Peak (N),vasmed_r Peak (N),vasint_r Peak (N),recfem_r Peak (N),Total Quadriceps Peak (N)
+LeaningJump,Forward Lean,0.433,78.9,-51.2,3819.6,4.1,740.0,0.79,18.6,3525.7,1767.9,998.8,749.1,7041.5
+UprightJump,Upright,0.167,54.0,-6.3,4143.2,4.45,368.5,0.4,55.0,4830.7,1170.8,600.4,1269.8,7871.6

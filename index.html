@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jump Landing Biomechanics: OpenSim Inverse Kinetics & Muscle Forces</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Plotly.js CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+          <i class="fas fa-bone"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">Jump Landing Biomechanics</h1>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">OpenSim + OpenCap</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">
+            Lawrence Technological University · Dept. of Biomedical Engineering · BME 4903 Advanced Kinesiology
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <a href="https://colab.research.google.com/github/LTUebl/jump-landing-opensim/blob/main/JumpLanding_OpenSim_Analysis.ipynb" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-md transition shadow-sm">
+          <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" class="h-4">
+        </a>
+        <a href="data/JumpLanding_OpenCap_OpenSimData_EGM.zip" download class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition">
+          <i class="fas fa-file-archive text-amber-600"></i>
+          <span>Example Data (.zip)</span>
+        </a>
+        <a href="data/JumpLanding_Posture_Comparison.xlsx" download class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition">
+          <i class="fas fa-file-excel text-emerald-600"></i>
+          <span>Results (.xlsx)</span>
+        </a>
+        <a href="https://github.com/LTUebl/jump-landing-opensim" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition shadow-sm">
+          <i class="fab fa-github"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-blue-900">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-3">
+            <i class="fas fa-chart-line"></i>
+            <span>Interactive Biomechanics Lab & Colab Pipeline</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3 leading-tight">
+            Inverse Kinetics & Knee Extensor Muscle Forces in Jump Landings
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            Compare impact attenuation, ground reaction forces (<span class="text-blue-300 font-semibold">vGRF</span>), and quadriceps muscle forces (<span class="text-amber-300 font-semibold">vaslat, vasmed, vasint, recfem</span>) across different landing postures (Forward Trunk Lean vs. Upright Trunk) using OpenCap markerless motion capture and OpenSim musculoskeletal modeling.
+          </p>
+          <div class="flex items-center gap-3 flex-wrap">
+            <a href="https://colab.research.google.com/github/LTUebl/jump-landing-opensim/blob/main/JumpLanding_OpenSim_Analysis.ipynb" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 transition shadow-lg hover:shadow-amber-400/20">
+              <i class="fas fa-play"></i>
+              <span>Launch Google Colab Notebook</span>
+            </a>
+            <a href="#visualizer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+              <i class="fas fa-chart-area text-blue-400"></i>
+              <span>Explore Interactive Charts</span>
+            </a>
+            <a href="#lab-questions" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white bg-transparent hover:bg-slate-800/60 transition">
+              <i class="fas fa-graduation-cap"></i>
+              <span>Lab Report Questions</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Stat Metric Badges -->
+        <div class="grid grid-cols-2 gap-3 w-full lg:w-auto">
+          <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4">
+            <div class="text-xs text-slate-400 font-medium">Upright Peak vGRF</div>
+            <div class="text-2xl font-black text-rose-400 mt-1">4.45 BW</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Stiff landing (0.17 s)</div>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4">
+            <div class="text-xs text-slate-400 font-medium">Leaning Peak vGRF</div>
+            <div class="text-2xl font-black text-blue-400 mt-1">4.10 BW</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Compliant landing (0.43 s)</div>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4">
+            <div class="text-xs text-slate-400 font-medium">Loading Rate Ratio</div>
+            <div class="text-2xl font-black text-amber-400 mt-1">3.0×</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">55.0 vs 18.6 BW/s</div>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4">
+            <div class="text-xs text-slate-400 font-medium">Quad Extensor Peak</div>
+            <div class="text-2xl font-black text-emerald-400 mt-1">7,872 N</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Upright quad demand</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- Interactive Visualizer Section -->
+    <section id="visualizer" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+            <h3 class="text-xl font-bold text-slate-900">Interactive Posture Comparison Explorer</h3>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">
+            Normalized Landing Absorption Phase: Initial Contact (0%) to Maximum Knee Flexion (100%) · Subject EGM (95 kg)
+          </p>
+        </div>
+
+        <!-- Chart View Tabs -->
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl flex-wrap">
+          <button onclick="switchView('vgrf_bw')" id="tab-vgrf_bw" class="tab-btn active px-3 py-1.5 text-xs font-bold rounded-lg transition bg-white text-blue-700 shadow-sm">
+            vGRF (BW)
+          </button>
+          <button onclick="switchView('knee_flexion')" id="tab-knee_flexion" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition text-slate-600 hover:text-slate-900">
+            Knee Flexion (°)
+          </button>
+          <button onclick="switchView('total_quads')" id="tab-total_quads" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition text-slate-600 hover:text-slate-900">
+            Total Quads (N)
+          </button>
+          <button onclick="switchView('knee_extensors_detail')" id="tab-knee_extensors_detail" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition text-slate-600 hover:text-slate-900">
+            All 4 Extensors
+          </button>
+          <button onclick="switchView('peak_bars')" id="tab-peak_bars" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition text-slate-600 hover:text-slate-900">
+            Peak Demand Bars
+          </button>
+        </div>
+      </div>
+
+      <!-- Plot Container -->
+      <div class="mt-6">
+        <div id="plot-area" class="w-full h-[450px]"></div>
+      </div>
+
+      <!-- Dynamic Biomechanical Note for Selected Tab -->
+      <div id="chart-note" class="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed flex items-start gap-3">
+        <i class="fas fa-info-circle text-blue-600 text-base mt-0.5"></i>
+        <div id="note-text">
+          <strong>Vertical Ground Reaction Force (vGRF):</strong> Upright jump landing produces a steeper impact peak (4.45 BW vs 4.10 BW) and a loading rate three times higher (55.0 BW/s vs 18.6 BW/s) due to the rigid, short absorption duration (0.17 s vs 0.43 s).
+        </div>
+      </div>
+    </section>
+
+    <!-- Side-by-Side Posture Comparison Table -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Landing Posture Biomechanical Summary</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Direct comparison between Forward Lean and Upright jump landings (Subject EGM, 95 kg, 1.95 m)</p>
+        </div>
+        <a href="data/JumpLanding_Posture_Comparison.xlsx" download class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800">
+          <i class="fas fa-download"></i>
+          <span>Excel Workbook</span>
+        </a>
+      </div>
+
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200 text-[11px]">
+            <tr>
+              <th class="px-4 py-3">Biomechanical Metric</th>
+              <th class="px-4 py-3 text-blue-700 bg-blue-50/50">Forward Lean Landing</th>
+              <th class="px-4 py-3 text-rose-700 bg-rose-50/50">Upright Landing</th>
+              <th class="px-4 py-3">Difference</th>
+              <th class="px-4 py-3">Biomechanical Significance</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Trunk / Lumbar Angle at KM</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">-51.2° (Deep Lean)</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">-6.3° (Erect)</td>
+              <td class="px-4 py-3 font-mono font-medium">-44.9°</td>
+              <td class="px-4 py-3 text-slate-500">Experimental posture check (Forward lean shifts COM forward)</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Peak Knee Flexion Angle</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">78.9°</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">54.0°</td>
+              <td class="px-4 py-3 font-mono font-medium text-emerald-600">+24.9°</td>
+              <td class="px-4 py-3 text-slate-500">Compliant landing strategy; deeper flexion increases absorption distance</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Absorption Duration</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">0.433 s</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">0.167 s</td>
+              <td class="px-4 py-3 font-mono font-medium text-emerald-600">+0.266 s (+160%)</td>
+              <td class="px-4 py-3 text-slate-500">Longer deceleration window reduces peak impact forces by impulse-momentum</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Peak Total vGRF</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">4.10 BW (3,820 N)</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">4.45 BW (4,143 N)</td>
+              <td class="px-4 py-3 font-mono font-medium text-rose-600">+0.35 BW (+8.5%)</td>
+              <td class="px-4 py-3 text-slate-500">Stiff upright posture generates higher skeletal peak force</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Impact Loading Rate</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">18.6 BW/s</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">55.0 BW/s</td>
+              <td class="px-4 py-3 font-mono font-medium text-rose-600">+36.4 BW/s (nearly 3×)</td>
+              <td class="px-4 py-3 text-slate-500">High loading rates are linked to cartilage wear and bone microdamage</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Vertical Impulse (Total)</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">0.79 BW·s (740 N·s)</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">0.40 BW·s (368 N·s)</td>
+              <td class="px-4 py-3 font-mono font-medium">+0.39 BW·s</td>
+              <td class="px-4 py-3 text-slate-500">Impulse integral over entire deceleration phase</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Vastus Lateralis (<span class="font-mono">vaslat</span>) Peak</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">3,526 N</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">4,831 N</td>
+              <td class="px-4 py-3 font-mono font-medium text-rose-600">+1,305 N (+37%)</td>
+              <td class="px-4 py-3 text-slate-500">Dominant quadriceps extensor; upright landing demands much higher force</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Rectus Femoris (<span class="font-mono">recfem</span>) Peak</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">749 N</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">1,270 N</td>
+              <td class="px-4 py-3 font-mono font-medium text-rose-600">+521 N (+69.5%)</td>
+              <td class="px-4 py-3 text-slate-500">Biarticular muscle; extended hip places recfem on stretch, increasing active force</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-semibold text-slate-900">Total Quadriceps Peak Force</td>
+              <td class="px-4 py-3 font-bold text-blue-700 bg-blue-50/30">7,042 N (7.56 BW)</td>
+              <td class="px-4 py-3 font-bold text-rose-700 bg-rose-50/30">7,872 N (8.45 BW)</td>
+              <td class="px-4 py-3 font-mono font-medium text-rose-600">+830 N (+11.8%)</td>
+              <td class="px-4 py-3 text-slate-500">High quadriceps demand combined with stiff knee increases ACL anterior tibial shear</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Student Colab Guide: 5 Simple Steps -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="pb-4 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Google Colab Step-by-Step Instructions</h3>
+          <p class="text-xs text-slate-500 mt-0.5">How students run the analysis from mobile video capture to final report</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <i class="fas fa-check-circle mr-1"></i> Zero-Restart Setup
+        </span>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow">1</div>
+          <h4 class="text-sm font-bold text-slate-900">Record Data in OpenCap</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Record single-cycle jump landings with 2+ smartphones using OpenCap. Perform one trial with a <strong>Forward Trunk Lean</strong> and one trial with an <strong>Upright Trunk</strong>. Download the session as a <strong>.zip</strong> file from the OpenCap web portal.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-600 text-white font-bold flex items-center justify-center text-sm shadow">2</div>
+          <h4 class="text-sm font-bold text-slate-900">Launch Google Colab</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Click the <strong class="text-amber-700">Open in Colab</strong> button. Run Cell 0 to set up the environment (<code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">pip install -q openpyxl pyopensim</code>). It completes in under 5 seconds with <strong>zero kernel restarts</strong>.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shadow">3</div>
+          <h4 class="text-sm font-bold text-slate-900">Upload Zip or Use Example</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            In Part 1.1, click <strong>"Choose Files"</strong> and upload your session <code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">.zip</code>. If you don't have your own data yet, leave it empty: the notebook will automatically download the Subject EGM example dataset!
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Step 4 -->
+        <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-purple-600 text-white font-bold flex items-center justify-center text-sm shadow">4</div>
+          <h4 class="text-sm font-bold text-slate-900">Automated Landing Event Detection & Inverse Kinetics</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            The notebook automatically identifies the <strong>Jump Apex</strong>, <strong>Initial Contact (IC)</strong>, and <strong>Maximum Knee Flexion (KM)</strong> without manual cropping. It calculates vertical ground reaction forces ($vGRF$) and knee extensor muscle forces (<code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">vaslat</code>, <code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">vasmed</code>, <code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">vasint</code>, <code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">recfem</code>).
+          </p>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm shadow">5</div>
+          <h4 class="text-sm font-bold text-slate-900">Export Report Figures & Excel Workbook</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            The notebook time-normalizes the absorption phase (0–100%) and automatically triggers a browser download for the 4-panel publication overlay figures (<code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">.png</code>) and the multi-sheet Excel spreadsheet (<code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">JumpLanding_Posture_Comparison.xlsx</code>).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lab Report Reflection Questions (Interactive Accordion) -->
+    <section id="lab-questions" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-question-circle text-amber-600 text-lg"></i>
+          <h3 class="text-lg font-bold text-slate-900">Lab Report Reflection Questions & Solutions</h3>
+        </div>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Key biomechanical mechanisms for students to answer in their BME 4903 lab report. Click each question to reveal the biomechanical rationale.
+        </p>
+      </div>
+
+      <div class="mt-6 space-y-4">
+        <!-- Q1 -->
+        <details class="group border border-slate-200 rounded-xl overflow-hidden transition">
+          <summary class="flex items-center justify-between p-4 bg-slate-50 cursor-pointer font-semibold text-slate-900 text-xs sm:text-sm hover:bg-slate-100 transition">
+            <span class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
+              <span>Impact Attenuation & Impulse-Momentum Principles</span>
+            </span>
+            <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div class="p-5 text-xs text-slate-700 bg-white border-t border-slate-200 leading-relaxed space-y-2">
+            <p><strong>Question:</strong> Why does landing with forward trunk lean reduce peak vGRF and loading rate compared to upright landing?</p>
+            <p class="text-slate-600 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <strong>Biomechanical Rationale:</strong> By Newton's Second Law and the impulse-momentum theorem, $J = \Delta p = \int_{t_{IC}}^{t_{KM}} F\, dt = m \Delta v$. Because downward velocity upon contact is determined by jump height, the required total change in momentum $\Delta p$ is nearly identical between trials. Forward trunk lean facilitates much greater knee flexion (78.9° vs 54.0°) and hip flexion, lengthening the deceleration window by over 2.5× (0.433 s vs 0.167 s). Spreading the momentum change over a longer duration substantially reduces the peak force (4.10 BW vs 4.45 BW) and slashes the impact loading rate by 66% (18.6 BW/s vs 55.0 BW/s).
+            </p>
+          </div>
+        </details>
+
+        <!-- Q2 -->
+        <details class="group border border-slate-200 rounded-xl overflow-hidden transition">
+          <summary class="flex items-center justify-between p-4 bg-slate-50 cursor-pointer font-semibold text-slate-900 text-xs sm:text-sm hover:bg-slate-100 transition">
+            <span class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">2</span>
+              <span>Biarticular Rectus Femoris Force-Length Mechanics</span>
+            </span>
+            <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div class="p-5 text-xs text-slate-700 bg-white border-t border-slate-200 leading-relaxed space-y-2">
+            <p><strong>Question:</strong> Why does the rectus femoris experience ~70% higher peak force in the upright posture (1,270 N vs 749 N)?</p>
+            <p class="text-slate-600 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <strong>Biomechanical Rationale:</strong> The rectus femoris is the only biarticular muscle of the quadriceps, crossing both the anterior hip (as a flexor) and anterior knee (as an extensor). In an upright landing (extended hip), the muscle fibers of the rectus femoris are stretched across the hip joint. Under the sliding filament force-length relationship, this placed the muscle fibers in a more optimal, stretched region that generates high passive and active tension. Conversely, forward trunk lean flexes the hip, passively shortening the rectus femoris at its proximal attachment, thereby reducing its force contribution.
+            </p>
+          </div>
+        </details>
+
+        <!-- Q3 -->
+        <details class="group border border-slate-200 rounded-xl overflow-hidden transition">
+          <summary class="flex items-center justify-between p-4 bg-slate-50 cursor-pointer font-semibold text-slate-900 text-xs sm:text-sm hover:bg-slate-100 transition">
+            <span class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">3</span>
+              <span>Vasti Muscle Sharing & Vastus Lateralis Dominance</span>
+            </span>
+            <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div class="p-5 text-xs text-slate-700 bg-white border-t border-slate-200 leading-relaxed space-y-2">
+            <p><strong>Question:</strong> Which individual vastus muscle generates the largest force, and why?</p>
+            <p class="text-slate-600 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <strong>Biomechanical Rationale:</strong> The vastus lateralis (<code class="bg-slate-200 px-1 py-0.5 rounded text-[11px]">vaslat</code>) generates the largest absolute force (4,831 N upright, 3,526 N leaning). This is because the vastus lateralis possesses the largest physiological cross-sectional area (PCSA) among all four quadriceps heads in human musculoskeletal models. It provides the primary eccentric torque required to prevent knee collapse during impact absorption.
+            </p>
+          </div>
+        </details>
+
+        <!-- Q4 -->
+        <details class="group border border-slate-200 rounded-xl overflow-hidden transition">
+          <summary class="flex items-center justify-between p-4 bg-slate-50 cursor-pointer font-semibold text-slate-900 text-xs sm:text-sm hover:bg-slate-100 transition">
+            <span class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold">4</span>
+              <span>ACL Injury Prevention & Tibial Shear Mechanics</span>
+            </span>
+            <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div class="p-5 text-xs text-slate-700 bg-white border-t border-slate-200 leading-relaxed space-y-2">
+            <p><strong>Question:</strong> Which landing posture creates greater risk for Anterior Cruciate Ligament (ACL) tears, and why?</p>
+            <p class="text-slate-600 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <strong>Biomechanical Rationale:</strong> The upright landing posture poses a substantially greater risk for non-contact ACL injuries. When the knee is flexed at a shallow angle (< 60°), the patellar tendon inserts onto the tibial tuberosity at an acute angle that directs a large component of quadriceps force anteriorly. With upright peak quadriceps forces exceeding 7,870 N, this generates extreme anterior tibial shear force, directly straining the ACL. Coaching athletes to land with moderate forward trunk flexion and deep knee flexion (> 70°) reduces patellar tendon anterior shear and protects the ligament.
+            </p>
+          </div>
+        </details>
+
+        <!-- Q5 -->
+        <details class="group border border-slate-200 rounded-xl overflow-hidden transition">
+          <summary class="flex items-center justify-between p-4 bg-slate-50 cursor-pointer font-semibold text-slate-900 text-xs sm:text-sm hover:bg-slate-100 transition">
+            <span class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">5</span>
+              <span>Hip vs. Knee Energy Dissipation (The Posterior Chain)</span>
+            </span>
+            <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <div class="p-5 text-xs text-slate-700 bg-white border-t border-slate-200 leading-relaxed space-y-2">
+            <p><strong>Question:</strong> In forward-lean landing, knee extensor demand is reduced. What muscle groups absorb the remaining energy?</p>
+            <p class="text-slate-600 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <strong>Biomechanical Rationale:</strong> Forward trunk flexion moves the body Center of Mass forward, shifting the ground reaction force vector closer to the knee joint axis (reducing the external knee flexion moment arm) and farther from the hip joint axis (increasing the external hip flexion moment arm). Consequently, mechanical energy dissipation is transferred from the anterior knee extensors to the powerful posterior chain hip extensors—specifically the gluteus maximus and hamstrings—which safely absorb impact energy without loading the patellar tendon or ACL.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <p class="font-semibold text-slate-300">BME 4903: Biomechanics of Movement / Advanced Kinesiology</p>
+        <p class="text-slate-500 mt-0.5">Lawrence Technological University · Department of Biomedical Engineering · Experimental Biomechanics Lab</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="https://colab.research.google.com/github/LTUebl/jump-landing-opensim/blob/main/JumpLanding_OpenSim_Analysis.ipynb" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Google Colab</a>
+        <a href="https://github.com/LTUebl/jump-landing-opensim" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">GitHub Repo</a>
+        <a href="data/JumpLanding_OpenCap_OpenSimData_EGM.zip" download class="hover:text-white transition">Example Data</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

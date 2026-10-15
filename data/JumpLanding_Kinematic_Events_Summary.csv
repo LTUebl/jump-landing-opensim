@@ -1,0 +1,3 @@
+Trial,Apex Time (s),Initial Contact (IC) Time (s),Knee Max (KM) Time (s),Absorption Duration (s),Peak Knee Flexion (deg),Lumbar Angle at KM (deg),Posture Classification
+LeaningJump,1.65,1.85,2.283,0.433,78.9,-51.2,Forward Lean
+UprightJump,3.3,3.533,3.7,0.167,54.0,-6.3,Upright
